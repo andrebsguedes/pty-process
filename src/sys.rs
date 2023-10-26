@@ -2,6 +2,7 @@ use std::os::{
     fd::{AsRawFd as _, FromRawFd as _},
     unix::prelude::OsStrExt as _,
 };
+use std::os::unix::fs::OpenOptionsExt;
 
 #[derive(Debug)]
 pub struct Pty(std::os::fd::OwnedFd);
@@ -43,6 +44,7 @@ impl Pty {
         Ok(Pts(std::fs::OpenOptions::new()
             .read(true)
             .write(true)
+            .custom_flags(libc::O_RDWR | libc::O_NOCTTY)
             .open(std::ffi::OsStr::from_bytes(
                 rustix::pty::ptsname(&self.0, vec![])?.as_bytes(),
             ))?
